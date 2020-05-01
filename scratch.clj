@@ -9,6 +9,9 @@
          '[clojure.string :as str])
 ;; => nil
 
+
+;; PART I
+
 ;; example fn
 (defn my-index-of
   "Returns the index at which search appears in source"
@@ -168,3 +171,32 @@
 ;;
 ;; Execution error (ClassCastException) at user/my-index-of (REPL:54).
 ;; class java.lang.Long cannot be cast to class java.lang.String (java.la;; ng.Long and java.lang.String are in module java.base of loader 'bootstrap')
+
+
+;; PART II (only the beginning of it)
+
+;; fn under test (slightly improved from Part I)
+(defn my-index-of
+  "Returns the index at which search appears in source"
+  [source search & opts]
+  (apply str/index-of source search opts))
+;; => #'spec-screencasts/my-index-of
+
+
+;; revised s/fdef, with s/alt, s/?, nilable, :fn, and :or
+(s/fdef my-index-of
+  :args (s/cat :source string?
+               :search (s/alt :string string?
+                              :char char?)
+               :from (s/? nat-int?))
+  :ret (s/nilable nat-int?)
+  :fn (s/or
+       :not-found #(nil? (:ret %))
+       :found #(<= (:ret %) (-> % :args :source count))))
+;; => spec-screencasts/my-index-of
+
+
+;; generative testing (with the revised s/fdef, it  is supposed to work, but it gives a different return)
+(->> (st/check 'my-index-of) st/summarize-results)
+;; => {:total 0}
+;; according to the screencast, it should be "{:total 1, :check-passed 1}"
