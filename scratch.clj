@@ -139,6 +139,32 @@
 (s/fdef my-index-of
   :args (s/cat :source string? :search string?)
   :ret nat-int?
-  :fn #(<= (:ret %) ()))
+  :fn #(<= (:ret %) (-> % :args :source count)))
 
-#(<= (:ret %) (-> % :args :source count))
+
+;; (enhanced) documentation - for free!
+(doc my-index-of)
+;; user/my-index-of
+;; ([source search
+;;   Returns the index at which search appears in source)
+;; Spec
+;;   args: (cat :source string? :search string?)
+;;   ret: nat-int?
+;;   fn: (<= (:ret %) (-> % :args :source count)))
+;; nil
+
+
+;; generative testing (it is supposed to fail and to be improved in Part II, but it succeeds...)
+(st/summarize-results (st/check 'my-index-of))
+;; {:total 0}
+
+
+;; instrumentation
+(st/instrument 'my-index-of)
+;; this one is supposed to return "[user/my-index-of]", but it returns "[]"
+
+(my-index-of "foo" 42)
+;; this one is supposed to return an Exception, but it returns an Execution error:
+;;
+;; Execution error (ClassCastException) at user/my-index-of (REPL:54).
+;; class java.lang.Long cannot be cast to class java.lang.String (java.la;; ng.Long and java.lang.String are in module java.base of loader 'bootstrap')
