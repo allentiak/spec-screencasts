@@ -153,20 +153,60 @@
 ;; nil
 
 
-;; generative testing (it is supposed to fail and to be improved in Part II, but it succeeds...)
-(st/summarize-results (st/check 'my-index-of))
-;; {:total 0}
+;; generative testing
+
+;; if we check our fn, it fails(*)... but now provides with very useful data
+;; (*)fn to be improved in Part II
+(st/summarize-results (st/check `my-index-of))
+;; {:spec
+;;  (fspec
+;;   :args
+;;   (cat :source string? :search string?)
+;;   :ret
+;;   nat-int?
+;;   :fn
+;;   (<= (:ret %) (-> % :args :source count))),
+;;  :sym user/my-index-of,
+;;  :failure
+;;  {:clojure.spec.alpha/problems
+;;   [{:path [:ret],
+;;     :pred clojure.core/nat-int?,
+;;     :val nil,
+;;     :via [],
+;;     :in []}],
+;;   :clojure.spec.alpha/spec
+;;   #object[clojure.spec.alpha$spec_impl$reify__2059 0x28884515 "clojure.spec.alpha$spec_impl$reify__2059@28884515"],
+;;   :clojure.spec.alpha/value nil,
+;;   :clojure.spec.test.alpha/args ("" "0"),
+;;   :clojure.spec.test.alpha/val nil,
+;;   :clojure.spec.alpha/failure :check-failed}}
+;; {:total 1, :check-failed 1}
 
 
 ;; instrumentation
-(st/instrument 'my-index-of)
-;; this one is supposed to return "[user/my-index-of]", but it returns "[]"
+(st/instrument `my-index-of)
+;; [user/my-index-of]
 
 (my-index-of "foo" 42)
-;; this one is supposed to return an Exception, but it returns an Execution error:
+;; Execution error - invalid arguments to user/my-index-of at (REPL:449).
+;; 42 - failed: string? at: [:search]
 ;;
-;; Execution error (ClassCastException) at user/my-index-of (REPL:54).
-;; class java.lang.Long cannot be cast to class java.lang.String (java.la;; ng.Long and java.lang.String are in module java.base of loader 'bootstrap')
+;;  Unhandled clojure.lang.ExceptionInfo
+;;    Spec assertion failed.
+;;
+;;          Spec: #object[clojure.spec.alpha$regex_spec_impl$reify__2509 0x13249f0c "clojure.spec.alpha$regex_spec_impl$reify__2509@13249f0c"]
+;;         Value: ("foo" 42)
+;;
+;;      Problems:
+;;
+;;             val: 42
+;;              in: [1]
+;;          failed: string?
+;;              at: [:search]
+;;
+;;                  alpha.clj:  132  clojure.spec.test.alpha/spec-checking-fn/conform!
+;;                  alpha.clj:  140  clojure.spec.test.alpha/spec-checking-fn/fn)
+;; ...
 
 
 ;; PART II (only the beginning of it)
@@ -192,7 +232,7 @@
 ;; => users/my-index-of
 
 
-;; generative testing (with the revised s/fdef, it  is supposed to work, but it gives a different return)
-(->> (st/check 'my-index-of) st/summarize-results)
-;; => {:total 0}
-;; according to the screencast, it should be "{:total 1, :check-passed 1}"
+;; generative testing (with the revised s/fdef, it  works)
+(->> (st/check `my-index-of) st/summarize-results)
+;; => {:sym user/my-index-of}
+;; {:total 1, :check-passed 1}
