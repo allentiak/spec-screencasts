@@ -1,7 +1,3 @@
-(ns spec-screencast
-  (:require [clojure.string :as str]))
-;; => nil
-
 ;; setup
 
 (require '[clojure.spec.alpha :as s]
@@ -17,7 +13,7 @@
   "Returns the index at which search appears in source"
   [source search]
   (str/index-of source search))
-;; => #'spec-screencast/my-index-of
+;; => #'user/my-index-of
 
 
 
@@ -35,17 +31,17 @@
 
 ;; my consts
 (def ^:const valid-data ["foobar" "b"])
-;; => #'spec-screencast/valid-data
+;; => #'user/valid-data
 
 (def ^:const invalid-data ["foo" 42])
-;; => #'spec-screencast/invalid-data
+;; => #'user/invalid-data
 
 ;; spec regex (of args, not chars)
 
 
 (s/def ::index-of-args
   (s/cat :source string? :search string?))
-;; => spec-screencast/index-of-args
+;; => user/index-of-args
 
 ;; let's check validation...
 
@@ -84,20 +80,20 @@
 
 ;; ...but gives useful feedback when evaluating invalid data
 (s/explain ::index-of-args invalid-data)
-;; 42 - failed: string? in: [1] at: [:search] spec: :spec-screencast/index-of-args
+;; 42 - failed: string? in: [1] at: [:search] spec: :user/index-of-args
 ;; => nil
 
 (s/explain-str ::index-of-args invalid-data)
-;; => "42 - failed: string? in: [1] at: [:search] spec: :spec-screencast/index-of-args\n"
+;; => "42 - failed: string? in: [1] at: [:search] spec: :user/index-of-args\n"
 
 (s/explain-data ::index-of-args invalid-data)
 ;; #:clojure.spec.alpha{:problems
 ;;                      [{:path [:search],
 ;;                        :pred clojure.core/string?,
 ;;                        :val 42,
-;;                        :via [:spec-screencast/index-of-args],
+;;                        :via [:user/index-of-args],
 ;;                        :in [1]}],
-;;                      :spec :spec-screencast/index-of-args,
+;;                      :spec :user/index-of-args,
 ;;                      :value ["foo" 42]}
 
 
@@ -106,9 +102,9 @@
                                       ["OK" "1"]
                                       ["bad2" 43]
                                       [38 "bad3"]])
-;; 3 - failed: string? in: [0 1] at: [:search] spec: :spec-screencast/index-of-args
-;; 43 - failed: string? in: [2 1] at: [:search] spec: :spec-screencast/index-of-args
-;; 38 - failed: string? in: [3 0] at: [:source] spec: :spec-screencast/index-of-args
+;; 3 - failed: string? in: [0 1] at: [:search] spec: :user/index-of-args
+;; 43 - failed: string? in: [2 1] at: [:search] spec: :user/index-of-args
+;; 38 - failed: string? in: [3 0] at: [:source] spec: :user/index-of-args
 ;; => nil
 
 ;; example data generation
@@ -134,7 +130,7 @@
 
 ;; with invalid data, returns something else...
 (s/assert ::index-of-args invalid-data)
-;; => Execution error - invalid arguments to spec-screencast/eval14889 at (REPL:133).
+;; => Execution error - invalid arguments to user/eval14889 at (REPL:133).
 ;; 42 - failed: string? at: [:search]
 
 
@@ -180,7 +176,7 @@
   "Returns the index at which search appears in source"
   [source search & opts]
   (apply str/index-of source search opts))
-;; => #'spec-screencasts/my-index-of
+;; => #'users/my-index-of
 
 
 ;; revised s/fdef, with s/alt, s/?, nilable, :fn, and :or
@@ -193,7 +189,7 @@
   :fn (s/or
        :not-found #(nil? (:ret %))
        :found #(<= (:ret %) (-> % :args :source count))))
-;; => spec-screencasts/my-index-of
+;; => users/my-index-of
 
 
 ;; generative testing (with the revised s/fdef, it  is supposed to work, but it gives a different return)
