@@ -25,7 +25,7 @@
 ;; => user/my-index-of
 
 
-;; generative testing (with the revised s/fdef, it  is supposed to work, but it gives a different return)
+;; generative testing (with the revised s/fdef)
 (->> (st/check `my-index-of) st/summarize-results)
 ;; => {:total 1, :check-passed 1}
 
