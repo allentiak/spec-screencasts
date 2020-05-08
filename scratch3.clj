@@ -19,13 +19,13 @@
 
 
 ;; transform an existing generator
-(defn fun-gen
+(defn foo-gen
   []
   (->> (s/gen (s/int-in 1 100))
        (gen/fmap #(str "FOO-" %))))
-;; #'user/fun-gen
+;; #'user/foo-gen
 
-(s/exercise ::id 10 {::id fun-gen})
+(s/exercise ::id 10 {::id foo-gen})
 ;; user=> (["FOO-1" "FOO-1"]
 ;;  ["FOO-2" "FOO-2"]
 ;;  ["FOO-2" "FOO-2"]
@@ -39,11 +39,12 @@
 
 ;; redefine ::id, adding generator to spec registry
 (s/def ::id
-  (s/spec (s/and string? #(str/starts-with? % "FOO-"))
-          :gen fun-gen))
+  (s/spec (s/and string?
+                 #(str/starts-with? % "FOO-"))
+          :gen foo-gen))
 ;; user => :user/id
 
-;; now, it works without having to explicitly mention "fun-gen"
+;; now, it works without having to explicitly mention "foo-gen"
 (s/exercise ::id)
 ;; user=> (["FOO-1" "FOO-1"]
 ;;  ["FOO-2" "FOO-2"]
@@ -72,7 +73,8 @@
 
 ;; dependent values
 (s/def ::lookup-finding-k (s/and (s/cat :lookup ::lookup :k keyword?)
-                                 (fn [{:keys [lookup k]}])))
+                                 (fn [{:keys [lookup k]}]
+                                   (contains? lookup k))))
 ;; user => :user/lookup-finding-k
 
 ;; just like the previous case, it is difficult to generate values without a generator fn
@@ -98,10 +100,26 @@
 ;; now, invoking s/exercise gives us conformant (albeit gibberish) data
 (s/exercise ::lookup-finding-k 10
             {::lookup-finding-k lookup-finding-k-gen})
-;; this is supposed to work, but it gives an error instead
-;;
-;; Error printing return value (ExceptionInfo) at clojure.test.check.generators/fn (generators.cljc:435).
-;; Couldn't satisfy such-that predicate after 100 tries.
-;; {:pred #function[clojure.spec.alpha/gensub/fn--1876],
-;;     :gen {:gen #function[clojure.test.check.generators/gen-bind/fn--11427]},
-;;     :max-tries 100}
+;; ([[{:Z/X "", :i/+ "", :s/u "", :-/u "", :./? "", :S/? ""} :s/u]
+;;   {:lookup {:Z/X "", :i/+ "", :s/u "", :-/u "", :./? "", :S/? ""}, :k :s/u}]
+;;  [[{:_/Z "",
+;;     :qr/m "",
+;;     :n/M "L",
+;;     :Q/HJ "o",
+;;     :Q/M "Z",
+;;     :w1/z "",
+;;     :F/l "",
+;;     :*/g "O"}
+;;    :Q/M]
+;;   {:lookup
+;;    {:_/Z "",
+;;     :qr/m "",
+;;     :n/M "L",
+;;     :Q/HJ "o",
+;;     :Q/M "Z",
+;;     :w1/z "",
+;;     :F/l "",
+;;     :*/g "O"},
+;;    :k :Q/M}]
+;;  ...
+;;  [[#:.{:oRY "Q"} :./oRY] {:lookup #:.{:oRY "Q"}, :k :./oRY}])
