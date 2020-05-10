@@ -1,34 +1,7 @@
 ;; setup
 (require '[clojure.spec.alpha :as s]
-         '[clojure.spec.test.alpha :as st]
-         '[clojure.string :as str])
-
-
-;; fn under test (slightly improved from Part I)
-(defn my-index-of
-  "Returns the index at which search appears in source"
-  [source search & opts]
-  (apply str/index-of source search opts))
-;; => #'user/my-index-of
-
-
-;; revised s/fdef, with s/alt, s/?, nilable, :fn, and :or
-(s/fdef my-index-of
-  :args (s/cat :source string?
-               :search (s/alt :string string?
-                              :char char?)
-               :from (s/? nat-int?))
-  :ret (s/nilable nat-int?)
-  :fn (s/or
-       :not-found #(nil? (:ret %))
-       :found #(<= (:ret %) (-> % :args :source count))))
-;; => user/my-index-of
-
-
-;; generative testing (with the revised s/fdef)
-(->> (st/check `my-index-of) st/summarize-results)
-;; => {:total 1, :check-passed 1}
-
+         '[clojure.spec.test.alpha :as st])
+;; user => nil
 
 ;; calling a spec'ed fn
 (defn which-came-first
@@ -41,13 +14,12 @@
       (< e-idx c-idx) :egg)))
 ;; => #'user/which-came-first
 
-
 ;; stacktrace-assisted debugging
-
+;;
 (which-came-first "the chicken or the egg" 0)
 ;; Execution error (ArityException) at user/my-index-of (REPL:60).
 ;; Wrong number of args (4) passed to: clojure.string/index-of
-
+;;
 (pst)
 ;; ArityException Wrong number of args (4) passed to: clojure.string/index-of
 ;;   clojure.core/apply (core.clj:669)
@@ -72,11 +44,11 @@
 (which-came-first "the chicken or the egg" 0)
 ;; Execution error - invalid arguments to user/my-index-of at (REPL:99).
 ;; :from - failed: nat-int? at: [:from]
-
+;;
 ;; now, the error message is much more useful: it's not about the number of args - it's about their type!
-
+;;
 ;; and we can get much more information about the error itself:
-
+;;
 ;; Unhandled clojure.lang.ExceptionInfo
 ;;    Spec assertion failed.
 ;;
@@ -95,12 +67,11 @@
 
 
 ;; test + instrument
-
 (s/fdef which-came-first
   :args (s/cat :source string? :from nat-int?)
   :ret #{:chicken :egg})
 ;; user => user/which-came-first
-
+;;
 (->> (st/check `which-came-first)
      st/summarize-results)
 ;; {:spec
